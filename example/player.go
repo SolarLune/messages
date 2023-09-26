@@ -2,31 +2,35 @@ package main
 
 import "github.com/solarlune/messages"
 
+// The Player in this example can take damage, heal, and die (when its HP is 0 after taking damage).
+// As it takes these actions, it sends messages through the Dispatcher.
 type Player struct {
 	HP         int
 	Dispatcher *messages.Dispatcher
 }
 
 func NewPlayer(dispatcher *messages.Dispatcher) *Player {
-	return &Player{
+	player := &Player{
 		HP:         3,
 		Dispatcher: dispatcher,
 	}
+	player.Dispatcher.Send(PlayerStartMessage{HPRemaining: player.HP})
+	player.Dispatcher.Send(PlayerWhineMessage{})
+	return player
 }
 
 func (player *Player) TakeDamage() {
-	// When taking damage, the Player will emit messages through the message Dispatcher.
 	player.HP--
+	player.Dispatcher.Send(PlayerDamageMessage{HPRemaining: player.HP})
+	player.Dispatcher.Send(PlayerWhineMessage{})
 	if player.HP <= 0 {
-		player.Dispatcher.SendMessage(PlayerDieMessage{})
-	} else {
-		player.Dispatcher.SendMessage(PlayerDamageMessage{HPRemaining: player.HP})
-		player.Dispatcher.SendMessage(PlayerWhineMessage{})
+		player.Dispatcher.Send(PlayerDieMessage{})
 	}
 }
 
 func (player *Player) Heal() {
 	oldHP := player.HP
 	player.HP++
-	player.Dispatcher.SendMessage(PlayerHealMessage{OldHP: oldHP, NewHP: player.HP})
+	player.Dispatcher.Send(PlayerHealMessage{OldHP: oldHP, NewHP: player.HP})
+	player.Dispatcher.Send(PlayerWhineMessage{})
 }

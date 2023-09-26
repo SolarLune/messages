@@ -3,11 +3,16 @@ package main
 import "github.com/solarlune/messages"
 
 const (
-	TypePlayerDamageMessage = 1 << iota
+	TypePlayerStartMessage = 1 << iota
+	TypePlayerDamageMessage
 	TypePlayerHealMessage
 	TypePlayerDieMessage
 	TypePlayerWhineMessage
 )
+
+type PlayerStartMessage struct{ HPRemaining int }
+
+func (msg PlayerStartMessage) Type() messages.MessageType { return TypePlayerStartMessage }
 
 type PlayerDamageMessage struct{ HPRemaining int }
 
