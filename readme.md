@@ -10,7 +10,7 @@ Messages is a simple pure-Go message-passing repo for gamedev. It's made to make
 
 ## How do I use it? 
 
-Check the example. It's pretty straightforward - you simply create a Dispatcher, register listener objects to the dispatcher, and send pre-defined messages through the dispatcher. Registered listeners will receive the messages as necessary.
+Check the example directory for a bit more of an in-depth example, but it's pretty straightforward overall - you create a Dispatcher, register receiving objects to the dispatcher, and send messages through the dispatcher. Registered listeners will receive the message as necessary.
 
 Here's a simplified example:
 
@@ -24,28 +24,34 @@ import (
 	"github.com/solarlune/messages"
 )
 
-
-
+// Receivers can be anything; they just need to implement messages.IReceiver.
+// That means that the object has a ReceiveMessage function and can receive an
+// arbitrary message.
 type Receiver struct{}
 
 func NewReceiver() *Receiver { return &Receiver{} }
 
-// Receivers can be anything; they just need to implement messages.IReceiver, which means
-// being able to receive an arbitrary message. You can type switch to get the specific contents more easily.
 func (receiver *Receiver) ReceiveMessage(msg messages.IMessage) {
+	// You can type switch the message against your pre-defined message types 
+	// to get specific contents easily.
 	fmt.Println("Received a message!")
 }
 
+// If you don't want a Receiver to receive all messages, then you can implement
+// ISubscriber, which means adding a Subscribe() function that returns the types
+// of Messages the Receiver subscribes to (accepts).
 
+// A Message can be anything, and only needs to implement messages.IMessage.
+// That means it has a Type() function that returns the type of the message
+// as a messages.MessageType, which is a uint64 that is made to do some simple 
+// bitwise operations.
 
+// This is primarily done to determine if a Receiver subscribes to a specific 
+// type of message.
 type MyMessage struct{}
 
 func NewMyMessage() *MyMessage { return &MyMessage{} }
 
-// A Message can be anything, and only needs to implement messages.IMessage, which means
-// returning the type of the message as a uint64 (which can be a constant). 
-// This is primarily done to identify message types to determine if a specific type of message goes
-// to a Receiver.
 func (msg *MyMessage) Type() messages.MessageType { return 1 }
 
 
@@ -59,7 +65,7 @@ func main() {
 	dispatcher.Register(NewReceiver())
 
     // Send a message; by default, it goes to all registered receivers.
-	dispatcher.SendMessage(NewMyMessage())
+	dispatcher.Send(NewMyMessage())
 
 }
 

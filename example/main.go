@@ -7,7 +7,7 @@ import (
 func main() {
 
 	// Create a new dispatcher.
-	dispatcher := messages.NewDispatcher()
+	dispatcher := messages.NewDispatch()
 
 	// Create and register a Receiver object.
 	// In this example, the Receiver will print messages and pause for a bit as it hears about what happens to the Player.
