@@ -32,8 +32,8 @@ type Receiver struct{}
 func NewReceiver() *Receiver { return &Receiver{} }
 
 func (receiver *Receiver) ReceiveMessage(msg messages.IMessage) {
-	// You can type switch the message against your pre-defined message types 
-	// to get specific contents easily.
+    // You can type switch the message against your pre-defined message struct
+    // types to get specific contents easily.
 	fmt.Println("Received a message!")
 }
 
@@ -41,32 +41,38 @@ func (receiver *Receiver) ReceiveMessage(msg messages.IMessage) {
 // ISubscriber, which means adding a Subscribe() function that returns the types
 // of Messages the Receiver subscribes to (accepts).
 
+////////
+
 // A Message can be anything, and only needs to implement messages.IMessage.
 // That means it has a Type() function that returns the type of the message
 // as a messages.MessageType, which is a uint64 that is made to do some simple 
-// bitwise operations.
-
+// bitwise operations (so the types should be a base-2 numeral, i.e. 1, 2, 4, 8, etc).
 // This is primarily done to determine if a Receiver subscribes to a specific 
 // type of message.
+
 type MyMessage struct{}
 
 func NewMyMessage() *MyMessage { return &MyMessage{} }
 
 func (msg *MyMessage) Type() messages.MessageType { return 1 }
 
-
+////////
 
 func main() {
 
     // Create a Dispatcher.
-	dispatcher := messages.NewDispatcher()
+    dispatcher := messages.NewDispatcher()
 
     // Register your receiver.
-	dispatcher.Register(NewReceiver())
+    dispatcher.Register(NewReceiver())
 
     // Send a message; by default, it goes to all registered receivers.
-	dispatcher.Send(NewMyMessage())
+    dispatcher.Send(NewMyMessage())
 
 }
 
 ```
+
+# To-do
+
+[ ] - Add the ability to consume a message so other receivers don't receive it (This can actually easily be done by just designing the message so that it is skippable and then altering it as it goes, but this would still be a nice option)

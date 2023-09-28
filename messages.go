@@ -3,10 +3,11 @@ package messages
 // Dispatcher dispatches messages to registered receivers.
 type Dispatcher struct {
 	receivers []IReceiver
+	consume   bool
 }
 
-// NewDispatch creates a new Dispatcher.
-func NewDispatch() *Dispatcher {
+// NewDispatcher creates a new Dispatcher.
+func NewDispatcher() *Dispatcher {
 	return &Dispatcher{}
 }
 
@@ -32,22 +33,26 @@ func (d *Dispatcher) Unregister(receivers ...IReceiver) {
 func (d *Dispatcher) Send(msg IMessage) {
 
 	for _, receiver := range d.receivers {
-		d.handleMessage(msg, receiver.(IReceiver))
-	}
-
-}
-
-// SendTo sends the specified message to all of the specified target IReceivers.
-func (d *Dispatcher) SendTo(msg IMessage, targets ...IReceiver) {
-
-	for _, receiver := range targets {
 		d.handleMessage(msg, receiver)
 	}
 
 }
 
-// handleMessage here handles messages that should be dispatched to target receivers, ensuring that the receiver
-// does wish to subscribe to the specified message type.
+// SendTo sends the specified message to the specified targets,
+// assuming they are IReceivers.
+// If the targets are not IReceivers, they will not receive the message.
+func (d *Dispatcher) SendTo(msg IMessage, targets ...any) {
+
+	for _, target := range targets {
+		if t, ok := target.(IReceiver); ok {
+			d.handleMessage(msg, t)
+		}
+	}
+
+}
+
+// handleMessage here handles messages that should be dispatched to target receivers,
+// ensuring that the receiver does wish to subscribe to the specified message type.
 func (d *Dispatcher) handleMessage(msg IMessage, target IReceiver) {
 	if subscriber, ok := target.(ISubscriber); ok {
 		subscriptions := subscriber.Subscribe()
